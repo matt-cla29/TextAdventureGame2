@@ -20,8 +20,7 @@ surface = pygame.image.load(image_path).convert_alpha()
 player_rect = surface.get_rect()
 player_rect.center = (400, 250)
 
-# insert a text box
-text_box = 
+
 
 clock = pygame.time.Clock()
 running = True
