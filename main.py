@@ -8,16 +8,14 @@ pygame.font.init()
 screen = pygame.display.set_mode((800, 600))
 pygame.display.set_caption("Pygame Text Example")
 
-# open page
-
 # intro section 
 try:
-    image_path2 = os.path.join(os.path.dirname(__file__), "images", "island.png")
-    surface2 = pygame.image.load(image_path2).convert()
-    surface2 = pygame.transform.scale(surface2, (800, 600))
+    image_path = os.path.join(os.path.dirname(__file__), "images", "chest_closed.png")
+    surface = pygame.image.load(image_path).convert()
+    surface = pygame.transform.scale(surface, (800, 600))
 except:
-    surface2 = pygame.Surface((800, 600))
-    surface2.fill((30, 30, 50))
+    surface = pygame.Surface((800, 600))
+    surface.fill((30, 30, 50))
 
 # Box dimensions
 text_box_rect = pygame.Rect(0, 0, 800, 230)
@@ -36,13 +34,13 @@ except:
     surface2.fill((30, 30, 50))
 
 try:
-    image_path = os.path.join(os.path.dirname(__file__), "images", "pirate.png")
-    surface = pygame.image.load(image_path).convert_alpha()
+    image_path3 = os.path.join(os.path.dirname(__file__), "images", "pirate.png")
+    surface3 = pygame.image.load(image_path3).convert_alpha()
 except:
-    surface = pygame.Surface((100, 150), pygame.SRCALPHA)
-    surface.fill((0, 200, 0))
+    surface3 = pygame.Surface((100, 150), pygame.SRCALPHA)
+    surface3.fill((0, 200, 0))
 
-player_rect = surface.get_rect()
+player_rect = surface3.get_rect()
 player_rect.center = (400, 250)
 
 # --- DIALOGUE SYSTEM SETUP ---
@@ -141,11 +139,14 @@ while running:
                         print("Conversation Finished!")
                         running = False
 
+   # 1. Draw intro background
+    screen.blit(surface, (0, 0))
+     
     # 1. Draw background
     screen.blit(surface2, (0, 0))
 
     # 2. Draw character sprite
-    screen.blit(surface, player_rect)
+    screen.blit(surface3, player_rect)
     
     # 3. Draw red text box background
     pygame.draw.rect(screen, (255, 0, 0), text_box_rect)
