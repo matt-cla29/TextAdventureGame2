@@ -36,6 +36,18 @@ except:
     surface2.fill((30, 30, 50))
 
 try:
+    image_path3 = os.path.join(os.path.dirname(__file__), "images", "forest.png")
+    forest_surface = pygame.image.load(image_path3).convert()
+    forest_surface = pygame.transform.scale(forest_surface, (800, 600))
+except:
+    # Fallback to green color background if the image isn't found
+    forest_surface = pygame.Surface((800, 600))
+    forest_surface.fill((34, 139, 34))
+
+# Create a variable tracking which background surface is actively being drawn
+current_background = surface2
+
+try:
     image_path = os.path.join(os.path.dirname(__file__), "images", "pirate.png")
     surface = pygame.image.load(image_path).convert_alpha()
 except:
@@ -44,6 +56,9 @@ except:
 
 player_rect = surface.get_rect()
 player_rect.center = (400, 250)
+
+# Track whether the pirate should be drawn on the screen
+draw_pirate = True
 
 # --- DIALOGUE SYSTEM SETUP ---
 game_font = pygame.font.Font(None, 32)
@@ -100,11 +115,13 @@ def draw_dialogue(surface_to_draw):
             surface_to_draw.blit(text_surf, text_rect)
             
     elif current_state == "response":
-        # Render the follow-up text branch after making a choice
-        text_surf = game_font.render(selected_branch[branch_index], True, white_color)
-        text_rect = text_surf.get_rect(center=(400, 500))
-        surface_to_draw.blit(text_surf, text_rect)
-
+        # Adding if selected_branch and branch_index < len(selected_branch): guarantees that your text drawing code will never look for an item in an empty list or look for an element beyond the list's actual size, preventing IndexError entirely.
+        if selected_branch and branch_index < len(selected_branch):
+            # Render the follow-up text branch after making a choice
+            text_surf = game_font.render(selected_branch[branch_index], True, white_color)
+            text_rect = text_surf.get_rect(center=(400, 500))
+            surface_to_draw.blit(text_surf, text_rect)
+   
 clock = pygame.time.Clock()
 running = True
 
@@ -138,20 +155,25 @@ while running:
                     branch_index += 1
                     if branch_index >= len(selected_branch):
                         # End conversation or loop back as needed
-                        print("Conversation Finished!")
+                        print("thanks for playing")
                         running = False
+                 
+                 # --- TRANSITION LOGIC HAPPENS HERE ---
+                    current_background = forest_surface  # Switch background layout
+                    draw_pirate = False                  # Hide the pirate speaker sprite
+                    current_state = "gameplay"           # Enter a generic gameplay phase
 
-    # 1. Draw background
-    screen.blit(surface2, (0, 0))
-
-    # 2. Draw character sprite
-    screen.blit(surface, player_rect)
+# 1. Clear display and blit the active background asset variable
+    screen.blit(current_background, (0, 0))
     
-    # 3. Draw red text box background
-    pygame.draw.rect(screen, (255, 0, 0), text_box_rect)
+    # 2. Draw the character sprite only if the active scene flag allows it
+    if draw_pirate:
+        screen.blit(surface, player_rect)
     
-    # 4. Process dynamic UI elements based on active conversation state
-    draw_dialogue(screen)
+    # 3. Only keep text boxes visible during an active talking state
+    if current_state in ["dialogue", "choice", "response"]:
+        pygame.draw.rect(screen, (255, 0, 0), text_box_rect)
+        draw_dialogue(screen)
 
     pygame.display.flip()
     clock.tick(60)
