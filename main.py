@@ -41,22 +41,26 @@ choice_responses2 = {
 
 
 current_line_index2 = 0
-current_state = "dialogue2"  # Options: "dialogue2", "choice2", "response2"
+current_state2 = "dialogue2"  # Options: "dialogue2", "choice2", "response2"
 selected_branch2 = []
 branch_index2 = 0
 
-def draw_dialogue(surface_to_draw2):
+# Box dimensions
+text_box_rect = pygame.Rect(0, 0, 800, 230)
+text_box_rect.center = (400, 500)
+
+def draw_dialogue2(surface_to_draw2):
     """Handles rendering text depending on the current game state."""
     gold_color = (255, 215, 0)
     white_color = (255, 255, 255)
     
-    if current_state == "dialogue2":
+    if current_state2 == "dialogue2":
             # Render standard dialogue line
-            text_surf = game_font.render(dialogue_lines[current_line_index2], True, white_color)
+            text_surf = game_font.render(dialogue_lines2[current_line_index2], True, white_color)
             text_rect = text_surf.get_rect(center=(400, 500))
             surface_to_draw2.blit(text_surf, text_rect)
 
-    elif current_state == "choice2":
+    elif current_state2 == "choice2":
             # Multi-line choice rendering (since \n doesn't work in a single render call)
             choice_lines2 = [
                 "Select a choice (Press 1, 2, or 3):",
@@ -72,54 +76,17 @@ def draw_dialogue(surface_to_draw2):
                 text_rect = text_surf.get_rect(topleft=(50, 410 + (i * 35)))
                 surface_to_draw2.blit(text_surf, text_rect)
                 
-    elif current_state == "response2":
+    elif current_state2 == "response2":
             # Adding if selected_branch and branch_index < len(selected_branch): guarantees that your text drawing code will never look for an item in an empty list or look for an element beyond the list's actual size, preventing IndexError entirely.
-            if selected_branch and branch_index < len(selected_branch):
+            if selected_branch2 and branch_index < len(selected_branch2):
                 # Render the follow-up text branch after making a choice
-                text_surf = game_font.render(selected_branch[branch_index], True, white_color)
+                text_surf = game_font.render(selected_branch2[branch_index], True, white_color)
                 text_rect = text_surf.get_rect(center=(400, 500))
                 surface_to_draw2.blit(text_surf, text_rect)
 
 clock = pygame.time.Clock()
 running = True
 
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        
-        elif event.type == pygame.KEYDOWN:
-            # STATE 1: Reading regular dialogue lines
-            if current_state == "dialogue2":
-                if event.key == pygame.K_RETURN:
-                    current_line_index2 += 1
-                    # If we finish the list, trigger the choice prompt
-                    if current_line_index2 >= len(dialogue_lines2):
-                        current_state = "choice2"
-
-            # STATE 2: Waiting for the player to press 1, 2, or 3
-            elif current_state == "choice2":
-                if event.key in [pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_KP1, pygame.K_KP2, pygame.K_KP3]:
-                    choice_made = event.unicode if event.unicode in ["1", "2", "3"] else pygame.key.name(event.key)[-1]
-                    
-                    if choice_made in choice_responses2:
-                        selected_branch = choice_responses2[choice_made]
-                        branch_index = 0
-                        current_state = "response2"
-
-            # STATE 3: Reading the resulting response text path
-            elif current_state == "response2":
-                if event.key == pygame.K_RETURN:
-                    branch_index += 1
-                    if branch_index >= len(selected_branch):
-                        # End conversation or loop back as needed
-                        print("thanks for playing")
-                        running = False
-                 
-                 # --- TRANSITION LOGIC HAPPENS HERE ---
-                    current_background = forest_surface  # Switch background layout
-                    draw_pirate = False                  # Hide the pirate speaker sprite
-                    current_state2 = "gameplay"           # Enter a generic gameplay phase
 
 try:
     image_path = os.path.join(os.path.dirname(__file__), "images", "pirate.png")
@@ -189,10 +156,10 @@ def draw_dialogue(surface_to_draw):
             surface_to_draw.blit(text_surf, text_rect)
             
     elif current_state == "response":
-        # Adding if selected_branch and branch_index < len(selected_branch): guarantees that your text drawing code will never look for an item in an empty list or look for an element beyond the list's actual size, preventing IndexError entirely.
-        if selected_branch and branch_index < len(selected_branch):
-            # Render the follow-up text branch after making a choice
-            text_surf = game_font.render(selected_branch[branch_index], True, white_color)
+         if selected_branch and branch_index < len(selected_branch):
+            text_surf = game_font.render(
+            selected_branch[branch_index], True, white_color
+        )
             text_rect = text_surf.get_rect(center=(400, 500))
             surface_to_draw.blit(text_surf, text_rect)
    
@@ -230,14 +197,49 @@ while running:
                     if branch_index >= len(selected_branch):
                         # End conversation or loop back as needed
                         print("thanks for playing")
-                        running = False
+                        print("Moving to forest...")
+                    current_background = forest_surface
+                    draw_pirate = False
+                    current_state = "gameplay"
+                    current_state2 = "dialogue2"
+                    current_line_index2 = 0
                  
                  # --- TRANSITION LOGIC HAPPENS HERE ---
                     current_background = forest_surface  # Switch background layout
                     draw_pirate = False                  # Hide the pirate speaker sprite
-                    current_state = "gameplay"           # Enter a generic gameplay phase
+                    current_state2 = "dialogue2"           # Enter a generic gameplay phase
+                    current_line_index2 = 0
 
+            # FOREST DIALOGUE SYSTEM
 
+            elif current_state == "gameplay":
+
+                if current_state2 == "dialogue2":
+                    if event.key == pygame.K_RETURN:
+                        current_line_index2 += 1
+
+                        if current_line_index2 >= len(dialogue_lines2):
+                            current_state2 = "choice2"
+
+                elif current_state2 == "choice2":
+                    if event.key in [
+                        pygame.K_1, pygame.K_2, pygame.K_3,
+                        pygame.K_KP1, pygame.K_KP2, pygame.K_KP3
+                    ]:
+                        choice_made = event.unicode
+
+                        if choice_made in choice_responses2:
+                            selected_branch2 = choice_responses2[choice_made]
+                            branch_index2 = 0
+                            current_state2 = "response2"
+
+                elif current_state2 == "response2":
+                    if event.key == pygame.K_RETURN:
+                        branch_index2 += 1
+
+                        if branch_index2 >= len(selected_branch2):
+                            current_state2 = "gameplay_finished"
+                            print("Forest dialogue finished")
 # 1. Clear display and blit the active background asset variable
     screen.blit(current_background, (0, 0))
     
@@ -249,9 +251,10 @@ while running:
     if current_state in ["dialogue", "choice", "response"]:
         pygame.draw.rect(screen, (255, 0, 0), text_box_rect)
         draw_dialogue(screen)
-
-    
-    
+    elif current_state2 in ["dialogue2", "choice2", "response2"]:
+        pygame.draw.rect(screen, (255, 0, 0), text_box_rect)
+        draw_dialogue2(screen)
+   
     pygame.display.flip()
     clock.tick(60)
 
